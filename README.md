@@ -21,7 +21,11 @@ handler, updates := msngrhook.SetupWebhook("my_verify_token")
 go http.ListenAndServe("0.0.0.0:3000", handler)
 
 for update := range updates {
-	// process updates
+	if update.Error != nil {
+		// handle error
+	} else {
+		// handle update
+	}
 }
 ```
 
