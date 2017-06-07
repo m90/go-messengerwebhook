@@ -52,8 +52,8 @@ type UpdateMessage struct {
 
 // UpdateAttachment describes an update's attachment
 type UpdateAttachment struct {
-	Type    string `json:"type"`
-	Payload string `json:"payload"`
+	Type    string      `json:"type"`
+	Payload interface{} `json:"payload"`
 }
 
 // UpdateQuickReply contains the payload of a quick reply
