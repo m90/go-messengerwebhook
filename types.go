@@ -1,5 +1,9 @@
 package msngrhook
 
+var stickerMap = map[string]string{
+	"https://scontent.xx.fbcdn.net/t39.1997-6/851557_369239266556155_759568595_n.png": "Y", // blue thumb up
+}
+
 // UpdateRequest describes the request body's top level wrapper
 type UpdateRequest struct {
 	Object string         `json:"object"`
@@ -29,10 +33,24 @@ func (u *Update) IsPostback() bool {
 }
 
 // NormalizedTextMessage returns the applicable text message of an update
-// depending on if it is a postback or standard message
+// depending on if it is a postback, standard message or an image with a defined
+// mapping value
 func (u *Update) NormalizedTextMessage() string {
 	if u.IsPostback() {
 		return u.Postback.Payload
+	}
+	if u.Message == nil {
+		return ""
+	}
+	if u.Message.Attachments != nil {
+		for _, a := range *u.Message.Attachments {
+			if a.Type == "image" {
+				url := a.Payload["url"].(string)
+				if mapping, ok := stickerMap[url]; ok {
+					return mapping
+				}
+			}
+		}
 	}
 	return u.Message.Text
 }
@@ -52,8 +70,8 @@ type UpdateMessage struct {
 
 // UpdateAttachment describes an update's attachment
 type UpdateAttachment struct {
-	Type    string      `json:"type"`
-	Payload interface{} `json:"payload"`
+	Type    string                 `json:"type"`
+	Payload map[string]interface{} `json:"payload"`
 }
 
 // UpdateQuickReply contains the payload of a quick reply

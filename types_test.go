@@ -54,6 +54,21 @@ func TestNormalizedTextMessage(t *testing.T) {
 			},
 			"message!",
 		},
+		{
+			Update{
+				Message: &UpdateMessage{
+					Attachments: &[]UpdateAttachment{
+						UpdateAttachment{
+							Type: "image",
+							Payload: map[string]interface{}{
+								"url": "https://scontent.xx.fbcdn.net/t39.1997-6/851557_369239266556155_759568595_n.png",
+							},
+						},
+					},
+				},
+			},
+			"Y",
+		},
 	}
 	for _, test := range tests {
 		if test.update.NormalizedTextMessage() != test.expectedMessage {
