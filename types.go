@@ -1,8 +1,9 @@
 package msngrhook
 
-var stickerMap = map[string]string{
-	"https://scontent.xx.fbcdn.net/t39.1997-6/851557_369239266556155_759568595_n.png": "Y", // blue thumb up
-}
+import (
+	"fmt"
+	"net/url"
+)
 
 // UpdateRequest describes the request body's top level wrapper
 type UpdateRequest struct {
@@ -45,10 +46,11 @@ func (u *Update) NormalizedTextMessage() string {
 	if u.Message.Attachments != nil {
 		for _, a := range *u.Message.Attachments {
 			if a.Type == "image" {
-				url := a.Payload["url"].(string)
-				if mapping, ok := stickerMap[url]; ok {
-					return mapping
+				u, uErr := url.Parse(a.Payload["url"].(string))
+				if uErr != nil {
+					continue
 				}
+				return fmt.Sprintf("%v://%v%v", u.Scheme, u.Host, u.Path)
 			}
 		}
 	}

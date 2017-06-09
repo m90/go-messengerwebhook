@@ -61,13 +61,13 @@ func TestNormalizedTextMessage(t *testing.T) {
 						UpdateAttachment{
 							Type: "image",
 							Payload: map[string]interface{}{
-								"url": "https://scontent.xx.fbcdn.net/t39.1997-6/851557_369239266556155_759568595_n.png",
+								"url": "https://scontent.xx.fbcdn.net/v/t39.1997-6/p100x100/851582_369239386556143_1497813874_n.png?_nc_ad=z-m&oh=52af86654b8cdb071a0d23c2c0208e88&oe=59E9AA4D",
 							},
 						},
 					},
 				},
 			},
-			"Y",
+			"https://scontent.xx.fbcdn.net/v/t39.1997-6/p100x100/851582_369239386556143_1497813874_n.png",
 		},
 	}
 	for _, test := range tests {
