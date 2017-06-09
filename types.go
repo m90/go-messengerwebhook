@@ -34,8 +34,7 @@ func (u *Update) IsPostback() bool {
 }
 
 // NormalizedTextMessage returns the applicable text message of an update
-// depending on if it is a postback, standard message or an image with a defined
-// mapping value
+// depending on if it is a postback, standard message or an image
 func (u *Update) NormalizedTextMessage() string {
 	if u.IsPostback() {
 		return u.Postback.Payload
