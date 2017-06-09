@@ -27,6 +27,7 @@ func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
 			}
 		case http.MethodPost:
 			bytes, _ := ioutil.ReadAll(r.Body)
+			defer r.Body.Close()
 			update := &UpdateRequest{}
 			unmarshalErr := json.Unmarshal(bytes, &update)
 			if unmarshalErr != nil {
