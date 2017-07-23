@@ -10,7 +10,7 @@ import (
 // SetupWebhook creates a http.HandlerFunc and a channel of updates
 // using the given verify token string
 func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
-	updates := make(chan Update, 1)
+	updates := make(chan Update)
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {

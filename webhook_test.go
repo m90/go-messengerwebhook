@@ -80,6 +80,23 @@ func TestSetupWebhook_Post(t *testing.T) {
 	}
 	for _, test := range tests {
 		handler, updates := SetupWebhook("abc123")
+
+		done := make(chan bool)
+		var err error
+		var message string
+		go func() {
+			for u := range updates {
+				if u.Error != nil {
+					err = u.Error
+				}
+				if u.Message != nil {
+					message = u.Message.Text
+				}
+				break
+			}
+			done <- true
+		}()
+
 		ts := httptest.NewServer(handler)
 		content, _ := ioutil.ReadFile(test.payload)
 		res, _ := http.DefaultClient.Post(ts.URL, "application/json; charset=utf-8", strings.NewReader(string(content)))
@@ -87,17 +104,15 @@ func TestSetupWebhook_Post(t *testing.T) {
 		if res.StatusCode != test.expectedStatusCode {
 			t.Errorf("Expected status code of %v, got %v", test.expectedStatusCode, res.StatusCode)
 		}
-		for u := range updates {
-			if test.expectError {
-				if u.Error == nil {
-					t.Error("Expected error to be not nil")
-				}
-			} else {
-				if u.Message.Text != test.expectedFirstMessage {
-					t.Errorf("Expected first message to be %v, got %v", test.expectedFirstMessage, u.Message.Text)
-				}
+		<-done
+		if test.expectError {
+			if err == nil {
+				t.Error("Expected error to be not nil")
 			}
-			break
+		} else {
+			if message != test.expectedFirstMessage {
+				t.Errorf("Expected first message to be %v, got %v", test.expectedFirstMessage, message)
+			}
 		}
 	}
 }
