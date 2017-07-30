@@ -26,17 +26,18 @@ func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
 				http.Error(w, "Missing hub.challenge parameter", http.StatusBadRequest)
 			}
 		case http.MethodPost:
-			bytes, _ := ioutil.ReadAll(r.Body)
+			bytes, bytesErr := ioutil.ReadAll(r.Body)
 			defer r.Body.Close()
+			if bytesErr != nil {
+				http.Error(w, bytesErr.Error(), http.StatusBadRequest)
+				return
+			}
 			update := &UpdateRequest{}
 			unmarshalErr := json.Unmarshal(bytes, &update)
 			if unmarshalErr != nil {
 				out := Update{Error: unmarshalErr}
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				updates <- out
-				return
-			}
-			if len(*update.Entry) == 0 {
 				return
 			}
 			for _, entry := range *update.Entry {

@@ -4,16 +4,19 @@ import "testing"
 
 func TestIsPostback(t *testing.T) {
 	tests := []struct {
+		name           string
 		update         Update
 		expectedResult bool
 	}{
 		{
+			"true",
 			Update{
 				Postback: &UpdatePostback{"postback!"},
 			},
 			true,
 		},
 		{
+			"false",
 			Update{
 				Message: &UpdateMessage{
 					Text: "message!",
@@ -24,28 +27,33 @@ func TestIsPostback(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		if test.update.IsPostback() != test.expectedResult {
-			t.Errorf(
-				"Expected result of %v, got %v",
-				test.expectedResult,
-				test.update.IsPostback(),
-			)
-		}
+		t.Run(test.name, func(t *testing.T) {
+			if test.update.IsPostback() != test.expectedResult {
+				t.Errorf(
+					"Expected result of %v, got %v",
+					test.expectedResult,
+					test.update.IsPostback(),
+				)
+			}
+		})
 	}
 }
 
 func TestNormalizedTextMessage(t *testing.T) {
 	tests := []struct {
+		name            string
 		update          Update
 		expectedMessage string
 	}{
 		{
+			"postback",
 			Update{
 				Postback: &UpdatePostback{"postback!"},
 			},
 			"postback!",
 		},
 		{
+			"default",
 			Update{
 				Message: &UpdateMessage{
 					Text: "message!",
@@ -55,6 +63,30 @@ func TestNormalizedTextMessage(t *testing.T) {
 			"message!",
 		},
 		{
+			"invalid URL",
+			Update{
+				Message: &UpdateMessage{
+					Text: "message!",
+					MID:  "some-value",
+					Attachments: &[]UpdateAttachment{
+						UpdateAttachment{
+							Type: "image",
+							Payload: map[string]interface{}{
+								"url": "%%%%%%%%%%%%%%%%%%%%%%%%%%%",
+							},
+						},
+					},
+				},
+			},
+			"message!",
+		},
+		{
+			"empty",
+			Update{},
+			"",
+		},
+		{
+			"image attachment",
 			Update{
 				Message: &UpdateMessage{
 					Attachments: &[]UpdateAttachment{
@@ -71,12 +103,14 @@ func TestNormalizedTextMessage(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		if test.update.NormalizedTextMessage() != test.expectedMessage {
-			t.Errorf(
-				"Expected result of %v, got %v",
-				test.expectedMessage,
-				test.update.NormalizedTextMessage(),
-			)
-		}
+		t.Run(test.name, func(t *testing.T) {
+			if test.update.NormalizedTextMessage() != test.expectedMessage {
+				t.Errorf(
+					"Expected result of %v, got %v",
+					test.expectedMessage,
+					test.update.NormalizedTextMessage(),
+				)
+			}
+		})
 	}
 }
