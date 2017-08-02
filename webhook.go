@@ -7,6 +7,14 @@ import (
 	"net/http"
 )
 
+const (
+	queryKeyChallenge       = "hub.challenge"
+	queryKeyToken           = "hub.verify_token"
+	messageMissingChallenge = "Missing hub.challenge parameter"
+	messageTokenMismatch    = "Verify token did not match"
+	responseBodyOK          = "OK"
+)
+
 // SetupWebhook creates a http.HandlerFunc and a channel of updates
 // using the given verify token string
 func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
@@ -15,14 +23,14 @@ func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			if token := r.URL.Query().Get("hub.verify_token"); token != verifyToken {
-				http.Error(w, "Verify token did not match", http.StatusUnauthorized)
+			if token := r.URL.Query().Get(queryKeyToken); token != verifyToken {
+				http.Error(w, messageTokenMismatch, http.StatusUnauthorized)
 				return
 			}
-			if challenge := r.URL.Query().Get("hub.challenge"); challenge != "" {
+			if challenge := r.URL.Query().Get(queryKeyChallenge); challenge != "" {
 				io.WriteString(w, challenge)
 			} else {
-				http.Error(w, "Missing hub.challenge parameter", http.StatusBadRequest)
+				http.Error(w, messageMissingChallenge, http.StatusBadRequest)
 			}
 		case http.MethodPost:
 			bytes, bytesErr := ioutil.ReadAll(r.Body)
@@ -42,7 +50,7 @@ func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
 					updates <- messaging
 				}
 			}
-			io.WriteString(w, "OK")
+			io.WriteString(w, responseBodyOK)
 		default:
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		}
