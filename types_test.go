@@ -101,6 +101,25 @@ func TestNormalizedTextMessage(t *testing.T) {
 			},
 			"https://scontent.xx.fbcdn.net/v/t39.1997-6/p100x100/851582_369239386556143_1497813874_n.png",
 		},
+		{
+			"location attachment",
+			Update{
+				Message: &UpdateMessage{
+					Attachments: &[]UpdateAttachment{
+						UpdateAttachment{
+							Type: "location",
+							Payload: map[string]interface{}{
+								"coordinates": map[string]interface{}{
+									"lat":  52.520007,
+									"long": 13.404954,
+								},
+							},
+						},
+					},
+				},
+			},
+			"52.520007, 13.404954",
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

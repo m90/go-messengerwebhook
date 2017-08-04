@@ -44,7 +44,14 @@ func (u *Update) NormalizedTextMessage() string {
 	}
 	if u.Message.Attachments != nil {
 		for _, a := range *u.Message.Attachments {
-			if a.Type == "image" {
+			switch a.Type {
+			case "location":
+				if coords, ok := a.Payload["coordinates"]; ok {
+					if cast, ok := coords.(map[string]interface{}); ok {
+						return fmt.Sprintf("%v, %v", cast["lat"], cast["long"])
+					}
+				}
+			default:
 				u, uErr := url.Parse(a.Payload["url"].(string))
 				if uErr != nil {
 					continue
@@ -54,6 +61,7 @@ func (u *Update) NormalizedTextMessage() string {
 		}
 	}
 	return u.Message.Text
+
 }
 
 // UpdatePostback contains the postback payload of an update
