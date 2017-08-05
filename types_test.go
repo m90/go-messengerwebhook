@@ -128,17 +128,17 @@ func TestNormalizedTextMessage(t *testing.T) {
 						UpdateAttachment{
 							Type: "template",
 							Payload: map[string]interface{}{
-								"elements": []map[string]interface{}{
-									{
-										"buttons": []map[string]interface{}{
-											{"title": "Open me", "type": "web_url", "url": "http://m.me/foo.bar"},
-											{"type": "element_share"},
+								"elements": []interface{}{
+									map[string]interface{}{
+										"buttons": []interface{}{
+											map[string]interface{}{"title": "Open me", "type": "web_url", "url": "http://m.me/foo.bar"},
+											map[string]interface{}{"type": "element_share"},
 										},
 									},
-									{
+									map[string]interface{}{
 										"image_url": "http://www.example.net/bar.jpg",
 									},
-									{
+									map[string]interface{}{
 										"title": "some super interesting thing",
 									},
 								},

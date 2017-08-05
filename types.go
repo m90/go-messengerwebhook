@@ -55,14 +55,20 @@ func (u *Update) NormalizedTextMessage() string {
 				if templateType, ok := a.Payload["template_type"]; !ok || templateType != "generic" {
 					break
 				}
-				if elements, ok := a.Payload["elements"].([]map[string]interface{}); ok {
+				if elements, ok := a.Payload["elements"].([]interface{}); ok {
 					for _, element := range elements {
-						if buttons, ok := element["buttons"].([]map[string]interface{}); ok {
-							for _, button := range buttons {
-								if t, ok := button["type"].(string); ok && t == "element_share" {
-									for _, button := range buttons {
-										if u, ok := button["url"].(string); ok {
-											return u
+						if castElement, ok := element.(map[string]interface{}); ok {
+							if buttons, ok := castElement["buttons"].([]interface{}); ok {
+								for _, button := range buttons {
+									if castButton, ok := button.(map[string]interface{}); ok {
+										if t, ok := castButton["type"].(string); ok && t == "element_share" {
+											for _, button := range buttons {
+												if castButton, ok := button.(map[string]interface{}); ok {
+													if u, ok := castButton["url"].(string); ok {
+														return u
+													}
+												}
+											}
 										}
 									}
 								}
