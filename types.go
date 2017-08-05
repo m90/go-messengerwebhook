@@ -51,6 +51,25 @@ func (u *Update) NormalizedTextMessage() string {
 						return fmt.Sprintf("%v, %v", cast["lat"], cast["long"])
 					}
 				}
+			case "template":
+				if templateType, ok := a.Payload["template_type"]; !ok || templateType != "generic" {
+					break
+				}
+				if elements, ok := a.Payload["elements"].([]map[string]interface{}); ok {
+					for _, element := range elements {
+						if buttons, ok := element["buttons"].([]map[string]interface{}); ok {
+							for _, button := range buttons {
+								if t, ok := button["type"].(string); ok && t == "element_share" {
+									for _, button := range buttons {
+										if u, ok := button["url"].(string); ok {
+											return u
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			default:
 				if value, ok := a.Payload["url"]; ok {
 					if urlStr, ok := value.(string); ok {

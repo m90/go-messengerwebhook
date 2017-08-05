@@ -120,6 +120,53 @@ func TestNormalizedTextMessage(t *testing.T) {
 			},
 			"52.520007, 13.404954",
 		},
+		{
+			"share button",
+			Update{
+				Message: &UpdateMessage{
+					Attachments: &[]UpdateAttachment{
+						UpdateAttachment{
+							Type: "template",
+							Payload: map[string]interface{}{
+								"elements": []map[string]interface{}{
+									{
+										"buttons": []map[string]interface{}{
+											{"title": "Open me", "type": "web_url", "url": "http://m.me/foo.bar"},
+											{"type": "element_share"},
+										},
+									},
+									{
+										"image_url": "http://www.example.net/bar.jpg",
+									},
+									{
+										"title": "some super interesting thing",
+									},
+								},
+								"sharable":      true,
+								"template_type": "generic",
+							},
+						},
+					},
+				},
+			},
+			"http://m.me/foo.bar",
+		},
+		{
+			"unknown template type",
+			Update{
+				Message: &UpdateMessage{
+					Attachments: &[]UpdateAttachment{
+						UpdateAttachment{
+							Type: "template",
+							Payload: map[string]interface{}{
+								"template_type": "super new",
+							},
+						},
+					},
+				},
+			},
+			"",
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
