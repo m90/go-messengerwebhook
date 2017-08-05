@@ -52,11 +52,15 @@ func (u *Update) NormalizedTextMessage() string {
 					}
 				}
 			default:
-				u, uErr := url.Parse(a.Payload["url"].(string))
-				if uErr != nil {
-					continue
+				if value, ok := a.Payload["url"]; ok {
+					if urlStr, ok := value.(string); ok {
+						u, uErr := url.Parse(urlStr)
+						if uErr != nil {
+							continue
+						}
+						return fmt.Sprintf("%v://%v%v", u.Scheme, u.Host, u.Path)
+					}
 				}
-				return fmt.Sprintf("%v://%v%v", u.Scheme, u.Host, u.Path)
 			}
 		}
 	}
