@@ -1,7 +1,6 @@
 package msngrhook
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -78,7 +77,7 @@ func TestSetupWebhook_Post(t *testing.T) {
 		{
 			"bad payload",
 			"testdata/invalid.json",
-			500,
+			400,
 			true,
 			"",
 		},
@@ -149,21 +148,4 @@ func TestSetupWebhook_Other(t *testing.T) {
 			}
 		})
 	}
-}
-
-type badReader int
-
-func (b badReader) Read(p []byte) (n int, err error) {
-	return 0, errors.New("I'm a bad reader")
-}
-func TestSetupWebhook_BadReader(t *testing.T) {
-	t.Run("bad reader", func(t *testing.T) {
-		r := httptest.NewRequest(http.MethodPost, "/", badReader(0))
-		w := httptest.NewRecorder()
-		handler, _ := SetupWebhook("abc123")
-		handler.ServeHTTP(w, r)
-		if w.Code != http.StatusBadRequest {
-			t.Errorf("Unexpected response code %v", w.Code)
-		}
-	})
 }

@@ -3,7 +3,6 @@ package msngrhook
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -33,26 +32,25 @@ func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
 				http.Error(w, messageMissingChallenge, http.StatusBadRequest)
 			}
 		case http.MethodPost:
-			bytes, bytesErr := ioutil.ReadAll(r.Body)
-			if bytesErr != nil {
-				http.Error(w, bytesErr.Error(), http.StatusBadRequest)
+			update := UpdateRequest{}
+			if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				updates <- Update{Error: err}
 				return
 			}
-			defer r.Body.Close()
-			update := &UpdateRequest{}
-			if unmarshalErr := json.Unmarshal(bytes, &update); unmarshalErr != nil {
-				http.Error(w, unmarshalErr.Error(), http.StatusInternalServerError)
-				updates <- Update{Error: unmarshalErr}
-				return
-			}
+
 			for _, entry := range *update.Entry {
 				for _, messaging := range *entry.Messaging {
 					updates <- messaging
 				}
 			}
-			io.WriteString(w, responseBodyOK)
+			w.Write([]byte(responseBodyOK))
 		default:
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			http.Error(
+				w,
+				http.StatusText(http.StatusMethodNotAllowed),
+				http.StatusMethodNotAllowed,
+			)
 		}
 	}
 	return handler, updates
