@@ -2,7 +2,6 @@ package msngrhook
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 )
 
@@ -27,7 +26,7 @@ func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
 				return
 			}
 			if challenge := r.URL.Query().Get(queryKeyChallenge); challenge != "" {
-				io.WriteString(w, challenge)
+				w.Write([]byte(challenge))
 			} else {
 				http.Error(w, messageMissingChallenge, http.StatusBadRequest)
 			}
