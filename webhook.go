@@ -13,44 +13,50 @@ const (
 	responseBodyOK          = "OK"
 )
 
-// SetupWebhook creates a http.HandlerFunc and a channel of updates
+type hook struct {
+	token   string
+	updates chan Update
+}
+
+// New creates a http.Handler and a channel of updates
 // using the given verify token string
-func SetupWebhook(verifyToken string) (http.HandlerFunc, <-chan Update) {
+func New(verifyToken string) (http.Handler, <-chan Update) {
 	updates := make(chan Update)
+	handler := hook{token: verifyToken, updates: updates}
+	return &handler, updates
+}
 
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			if token := r.URL.Query().Get(queryKeyToken); token != verifyToken {
-				http.Error(w, messageTokenMismatch, http.StatusUnauthorized)
-				return
-			}
-			if challenge := r.URL.Query().Get(queryKeyChallenge); challenge != "" {
-				w.Write([]byte(challenge))
-			} else {
-				http.Error(w, messageMissingChallenge, http.StatusBadRequest)
-			}
-		case http.MethodPost:
-			update := UpdateRequest{}
-			if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				updates <- Update{Error: err}
-				return
-			}
-
-			for _, entry := range *update.Entry {
-				for _, messaging := range *entry.Messaging {
-					updates <- messaging
-				}
-			}
-			w.Write([]byte(responseBodyOK))
-		default:
-			http.Error(
-				w,
-				http.StatusText(http.StatusMethodNotAllowed),
-				http.StatusMethodNotAllowed,
-			)
+func (h *hook) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		if token := r.URL.Query().Get(queryKeyToken); token != h.token {
+			http.Error(w, messageTokenMismatch, http.StatusUnauthorized)
+			return
 		}
+		if challenge := r.URL.Query().Get(queryKeyChallenge); challenge != "" {
+			w.Write([]byte(challenge))
+		} else {
+			http.Error(w, messageMissingChallenge, http.StatusBadRequest)
+		}
+	case http.MethodPost:
+		update := updateRequest{}
+		if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			h.updates <- Update{Error: err}
+			return
+		}
+
+		for _, entry := range *update.Entry {
+			for _, messaging := range *entry.Messaging {
+				h.updates <- messaging
+			}
+		}
+		w.Write([]byte(responseBodyOK))
+	default:
+		http.Error(
+			w,
+			http.StatusText(http.StatusMethodNotAllowed),
+			http.StatusMethodNotAllowed,
+		)
 	}
-	return handler, updates
 }

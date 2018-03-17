@@ -14,10 +14,10 @@ $go get github.com/m90/go-messengerwebhook
 
 ## Usage
 
-Calling `SetupWebhook(verifyToken string)` returns a `http.HandlerFunc` and a `<-chan msngrhook.Update`:
+Calling `New(verifyToken string)` returns a `http.Handler` and a `<-chan msngrhook.Update`:
 
 ```go
-handler, updates := msngrhook.SetupWebhook("my_verify_token")
+handler, updates := msngrhook.New("my_verify_token")
 go http.ListenAndServe("0.0.0.0:3000", handler)
 
 for update := range updates {

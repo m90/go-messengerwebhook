@@ -5,14 +5,12 @@ import (
 	"net/url"
 )
 
-// UpdateRequest describes the request body's top level wrapper
-type UpdateRequest struct {
+type updateRequest struct {
 	Object string         `json:"object"`
-	Entry  *[]UpdateEntry `json:"entry"`
+	Entry  *[]updateEntry `json:"entry"`
 }
 
-// UpdateEntry describes an entry contained in the top level wrapper
-type UpdateEntry struct {
+type updateEntry struct {
 	ID        string    `json:"id"`
 	Time      int       `json:"time"`
 	Messaging *[]Update `json:"messaging"`

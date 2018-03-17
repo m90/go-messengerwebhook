@@ -49,7 +49,7 @@ func TestSetupWebhook_Get(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			handler, _ := SetupWebhook("abc123")
+			handler, _ := New("abc123")
 			ts := httptest.NewServer(handler)
 			res, resErr := http.DefaultClient.Get(fmt.Sprintf("%v%v", ts.URL, test.requestURL))
 			if resErr != nil {
@@ -91,7 +91,7 @@ func TestSetupWebhook_Post(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			handler, updates := SetupWebhook("abc123")
+			handler, updates := New("abc123")
 			done := make(chan bool)
 			var err error
 			var message string
@@ -139,7 +139,7 @@ func TestSetupWebhook_Other(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			handler, _ := SetupWebhook("abc123")
+			handler, _ := New("abc123")
 			ts := httptest.NewServer(handler)
 			req, _ := http.NewRequest(test.method, ts.URL, nil)
 			res, _ := http.DefaultClient.Do(req)
