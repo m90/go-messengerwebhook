@@ -1,9 +1,6 @@
-default: test vet
-
-vet:
-	@go vet ./...
+default: test
 
 test:
 	@go test -race -v -cover ./...
 
-.PHONY: test vet
+.PHONY: test
